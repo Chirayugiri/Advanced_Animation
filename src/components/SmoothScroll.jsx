@@ -6,7 +6,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 const SmoothScroll = () => {
   useEffect(() => {
     const lenis = new Lenis({
-      autoRaf: true, // Newer Lenis versions can handle raf automatically or we can keep manual
+      lerp: 0.07, // Adjust this for scrolling smoothness (lower is smoother)
+      wheelMultiplier: 1,
+      smoothWheel: true,
+      autoRaf: true, 
     })
 
     // Add lenis class to html for CSS

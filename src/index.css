@@ -13,10 +13,13 @@ body {
   background-color: var(--dark);
   color: white;
   font-family: 'Inter', sans-serif;
-  overflow-x: clip; /* clip allows sticky to work unlike hidden */
+  overflow-x: clip;
+  /* clip allows sticky to work unlike hidden */
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: 'Outfit', sans-serif;
   text-transform: uppercase;
 }
@@ -34,7 +37,8 @@ h1, h2, h3 {
 }
 
 .scroll-container {
-  overflow-x: clip; /* Removed hidden to avoid breaking sticky */
+  overflow-x: clip;
+  /* Removed hidden to avoid breaking sticky */
 }
 
 /* Lenis recommend CSS */
