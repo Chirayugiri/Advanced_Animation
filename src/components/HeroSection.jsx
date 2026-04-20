@@ -5,7 +5,7 @@ import { initScrollAnimations } from '../animations/scrollAnimations';
 // Import images
 import img1 from '../assets/mma1.jpeg';
 import img2 from '../assets/mma2.jpeg';
-import img3 from '../assets/mma3.jpeg';
+import img3 from '../assets/mma5.jpeg';
 import img4 from '../assets/mma4.jpeg';
 
 const sectionsData = [
@@ -37,7 +37,7 @@ const HeroSection = () => {
 
   useLayoutEffect(() => {
     const cleanup = initScrollAnimations(containerRef, sectionsRef);
-    
+
     return () => {
       if (cleanup) cleanup();
     };
@@ -52,7 +52,7 @@ const HeroSection = () => {
   return (
     <div ref={containerRef} className="hero-container bg-dark w-full">
       {sectionsData.map((data, index) => (
-        <Section 
+        <Section
           key={index}
           ref={addToRefs}
           index={index}
