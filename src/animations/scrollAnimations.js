@@ -5,12 +5,12 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const initScrollAnimations = (containerRef, sectionsRef) => {
   const sections = sectionsRef.current;
-  
+
   if (!sections || sections.length === 0) return;
 
   // Use gsap.context for easy and bulletproof cleanup in React
   const ctx = gsap.context(() => {
-    
+
     sections.forEach((section, index) => {
       // 1. Image Parallax Optimization
       // Keeping movement subtle (-10 to 10 yPercent) instead of large margins
@@ -19,9 +19,9 @@ export const initScrollAnimations = (containerRef, sectionsRef) => {
       if (image) {
         // Set initial state for performance
         gsap.set(image, { willChange: 'transform', scale: 1.05 });
-        
-        gsap.fromTo(image, 
-          { 
+
+        gsap.fromTo(image,
+          {
             yPercent: -10, // Start slightly up
           },
           {
@@ -41,12 +41,12 @@ export const initScrollAnimations = (containerRef, sectionsRef) => {
       const title = section.querySelector('.text-title');
       const desc = section.querySelector('.text-desc');
       const btn = section.querySelector('.text-btn');
-      
+
       const textElements = [title, desc, btn].filter(Boolean);
-      
+
       if (textElements.length > 0) {
         gsap.set(textElements, { autoAlpha: 0, y: 40, willChange: 'transform, opacity' });
-        
+
         // For the very first section, animate in immediately without scroll requirement
         if (index === 0) {
           gsap.to(textElements, {
@@ -76,26 +76,26 @@ export const initScrollAnimations = (containerRef, sectionsRef) => {
           });
         }
       }
-      
+
       // 3. Section overlapping transition (Underlap feel)
       if (index < sections.length - 1) {
         const nextSection = sections[index + 1];
-        
+
         gsap.to(section, {
-          scale: 0.92,
-          filter: 'brightness(0.3)', // darken it significantly as it gets covered
-          ease: 'none',
+          scale: 0.95, // Subtler scale down
+          filter: 'brightness(0.4)', // Less aggressive darkening
+          ease: 'power2.in', // Exponential curve: delays the effect until the very end
           scrollTrigger: {
             trigger: nextSection,
-            start: 'top bottom', // Start scaling/darkening as the *next* section enters the screen
-            end: 'top top',      // fully scaled/darkened when the next section fully covers it
+            start: 'top 80%', // Wait until the next section is 20% up the screen before starting
+            end: 'top top',
             scrub: true
           }
         });
       }
-      
+
     });
-    
+
     // Refresh ScrollTrigger to calculate proper heights after dynamic loads
     ScrollTrigger.refresh();
 
