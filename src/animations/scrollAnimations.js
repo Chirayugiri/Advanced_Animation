@@ -8,107 +8,101 @@ export const initScrollAnimations = (containerRef, sectionsRef) => {
   
   if (!sections || sections.length === 0) return;
 
-  sections.forEach((section, index) => {
-    const timeline = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: '+=100%',
-        scrub: 1.5, // Smooth feel
-        pin: true,
-        pinSpacing: false, // For overlapping effect
-        // markers: true // for debugging
+  // Use gsap.context for easy and bulletproof cleanup in React
+  const ctx = gsap.context(() => {
+    
+    sections.forEach((section, index) => {
+      // 1. Image Parallax Optimization
+      // Keeping movement subtle (-10 to 10 yPercent) instead of large margins
+      // using translate3d under the hood by GSAP
+      const image = section.querySelector('.parallax-img');
+      if (image) {
+        // Set initial state for performance
+        gsap.set(image, { willChange: 'transform', scale: 1.05 });
+        
+        gsap.fromTo(image, 
+          { 
+            yPercent: -10, // Start slightly up
+          },
+          {
+            yPercent: 10,  // Move slightly down
+            ease: 'none',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top bottom', // Start when section top enters bottom of viewport
+              end: 'bottom top',   // End when section bottom leaves top of viewport
+              scrub: 0.5,          // Optimized scrub value for smoothness (not true)
+            }
+          }
+        );
       }
+
+      // 2. Text Reveal Animations
+      const title = section.querySelector('.text-title');
+      const desc = section.querySelector('.text-desc');
+      const btn = section.querySelector('.text-btn');
+      
+      const textElements = [title, desc, btn].filter(Boolean);
+      
+      if (textElements.length > 0) {
+        gsap.set(textElements, { autoAlpha: 0, y: 40, willChange: 'transform, opacity' });
+        
+        // For the very first section, animate in immediately without scroll requirement
+        if (index === 0) {
+          gsap.to(textElements, {
+            autoAlpha: 1,
+            y: 0,
+            stagger: 0.15,
+            duration: 1.2,
+            ease: 'power3.out',
+            delay: 0.2
+          });
+        } else {
+          // Standard scroll trigger for other sections
+          ScrollTrigger.create({
+            trigger: section,
+            start: 'top 75%', // Trigger slightly earlier for better UX
+            onEnter: () => {
+              gsap.to(textElements, {
+                autoAlpha: 1,
+                y: 0,
+                stagger: 0.1,
+                duration: 1,
+                ease: 'power3.out'
+              });
+            },
+            // Note: intentionally not reversing on leave to prevent distracting re-animations
+            // but can be added if needed via onLeaveBack or toggleActions
+          });
+        }
+      }
+      
+      // 3. Section overlapping transition (Underlap feel)
+      if (index < sections.length - 1) {
+        const nextSection = sections[index + 1];
+        
+        gsap.to(section, {
+          scale: 0.92,
+          filter: 'brightness(0.3)', // darken it significantly as it gets covered
+          ease: 'none',
+          scrollTrigger: {
+            trigger: nextSection,
+            start: 'top bottom', // Start scaling/darkening as the *next* section enters the screen
+            end: 'top top',      // fully scaled/darkened when the next section fully covers it
+            scrub: true
+          }
+        });
+      }
+      
     });
+    
+    // Refresh ScrollTrigger to calculate proper heights after dynamic loads
+    ScrollTrigger.refresh();
 
-    // 1. Current section scale down effect (overlapping feel)
-    if (index < sections.length - 1) {
-      timeline.to(section, {
-        scale: 0.95,
-        opacity: 0.5,
-        ease: 'none',
-      }, 0);
-    }
+  }, containerRef); // Scope context to container
 
-    // 2. Parallax and Zoom on image
-    const image = section.querySelector('.parallax-img');
-    if (image) {
-      gsap.fromTo(image, 
-        { 
-          y: '20%',
-          scale: 1.1,
-        },
-        {
-          y: '-20%',
-          scale: 1.2,
-          scrollTrigger: {
-            trigger: section,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: true,
-          }
-        }
-      );
-
-      // Blur to sharp effect
-      gsap.fromTo(image,
-        { filter: 'blur(10px) brightness(0.5)' },
-        { 
-          filter: 'blur(0px) brightness(1)',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top bottom',
-            end: 'top center',
-            scrub: true,
-          }
-        }
-      );
-    }
-
-    // 3. Text Stagger Animations
-    const title = section.querySelector('.text-title');
-    const desc = section.querySelector('.text-desc');
-    const btn = section.querySelector('.text-btn');
-
-    // For the first section, we want it visible immediately or with a quick entrance
-    if (index === 0) {
-      gsap.fromTo([title, desc, btn], 
-        { opacity: 0, y: 50 },
-        { 
-          opacity: 1, 
-          y: 0, 
-          stagger: 0.15, 
-          duration: 1.2, 
-          ease: 'power4.out',
-          delay: 0.5 // Small delay for the initial wow factor
-        }
-      );
-    } else {
-      const textTimeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 70%', // Trigger earlier
-          toggleActions: 'play none none reverse', // Don't fade out mid-section
-        }
-      });
-
-      textTimeline.fromTo([title, desc, btn], 
-        { 
-          opacity: 0, 
-          y: 60 
-        },
-        { 
-          opacity: 1, 
-          y: 0, 
-          stagger: 0.2, 
-          duration: 1, 
-          ease: 'power4.out' 
-        }
-      );
-    }
-  });
-
+  // Return cleanup function for React's useLayoutEffect
   return () => {
-    ScrollTrigger.getAll().forEach(t => t.kill());
+    ctx.revert(); // Automatically kills all ScrollTriggers and animations in context
   };
 };

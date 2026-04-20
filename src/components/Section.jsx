@@ -4,14 +4,14 @@ const Section = forwardRef(({ title, description, imageSrc, index }, ref) => {
   return (
     <section 
       ref={ref} 
-      className="section-pin relative h-screen w-full bg-dark overflow-hidden"
+      className="section-pin sticky top-0 h-screen w-full bg-dark overflow-hidden"
     >
       {/* Full-Screen Background Image with Parallax */}
       <div className="absolute inset-0 z-0 h-full w-full">
         <img 
           src={imageSrc} 
           alt={title}
-          className="parallax-img w-full h-[120%] object-cover object-center scale-110"
+          className="parallax-img w-full h-[120%] object-cover object-center"
         />
         {/* Dark Overlay for Readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
